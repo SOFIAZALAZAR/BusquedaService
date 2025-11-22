@@ -57,19 +57,43 @@ public class Indexer {
         d.setOrigenId(p.id());
         d.setHechoId(p.hechoId());
 
-        // Puede que el Hecho aún no haya llegado → dejamos null y luego upsertHecho lo completa
-        d.setTitulo(d.getTitulo());     // no tocar si ya estaba
-        d.setColeccion(d.getColeccion());
+        // ===== 1) Completar desde el HECHO si ya está indexado =====
+        if (p.hechoId() != null) {
+            String idHecho = buildId("HECHO", p.hechoId());
+            repo.findById(idHecho).ifPresent(hechoDoc -> {
+                if (d.getTitulo() == null || d.getTitulo().isBlank()) {
+                    d.setTitulo(hechoDoc.getTitulo());
+                }
+                if (d.getColeccion() == null) {
+                    d.setColeccion(hechoDoc.getColeccion());
+                }
+                // opcional: si no tenía fecha, usar la del Hecho
+                if (d.getFecha() == null && hechoDoc.getFecha() != null) {
+                    d.setFecha(hechoDoc.getFecha());
+                }
+            });
+        }
+
+        // ===== 2) Fallback: si sigue sin título, usar algo del propio PDI =====
+        if (d.getTitulo() == null || d.getTitulo().isBlank()) {
+            d.setTitulo(p.descripcion()); // o "PDI de hecho " + p.hechoId()
+        }
+
+        // Si la colección quedó null y no encontraste Hecho, podés dejarla así
+        // o setear alguna por defecto si quisieras.
 
         d.setDescripcion(p.descripcion());
         d.setTags(copy(p.etiquetas())); // solo tags que usarás para AND
         d.setTexto(buildPdiTexto(p));
         d.setOculto(false);
+
         if (d.getFecha() == null) {
             d.setFecha(p.momento() != null ? p.momento() : LocalDateTime.now());
         }
+
         repo.save(d);
     }
+
 
     /* ============ Borrado/ocultar ============ */
     public void hideHecho(String hechoId) {
