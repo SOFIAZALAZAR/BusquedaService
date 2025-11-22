@@ -20,6 +20,7 @@ public class SearchDoc {
     private String descripcion;
     private List<String> tags;
     private String texto;
+    private String textoOcr;
     private boolean oculto;
     private LocalDateTime fecha;
 
@@ -55,4 +56,9 @@ public class SearchDoc {
 
     public LocalDateTime getFecha() { return fecha; }
     public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
+
+    public String getTextoOcr() { return textoOcr; }
+
+    public void setTextoOcr(String textoOcr) { this.textoOcr = textoOcr; }
+
 }

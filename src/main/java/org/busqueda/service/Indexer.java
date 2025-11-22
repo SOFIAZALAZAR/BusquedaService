@@ -85,6 +85,7 @@ public class Indexer {
         d.setDescripcion(p.descripcion());
         d.setTags(copy(p.etiquetas())); // solo tags que usarás para AND
         d.setTexto(buildPdiTexto(p));
+        d.setTextoOcr(p.resultadoOcr());
         d.setOculto(false);
 
         if (d.getFecha() == null) {
